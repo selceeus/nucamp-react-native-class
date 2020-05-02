@@ -10,7 +10,6 @@ const mapStateToProps = state => {
     };
 };
 
-
 class Directory extends Component {
 
     static navigationOptions = {
@@ -29,6 +28,7 @@ class Directory extends Component {
                     imageSrc={{ source: {uri: baseUrl + item.image }}}
                 />
             );
+            
         };
 
         return (
