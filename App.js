@@ -18,3 +18,5 @@ export default function App() {
       </Provider>
   );
 }
+//Disable warnings in the device emulator
+console.disableYellowBox = true;

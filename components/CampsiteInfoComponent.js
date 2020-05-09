@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, FlatList, Modal, Button, StyleSheet, Alert, PanResponder } from 'react-native';
+import { Text, View, ScrollView, FlatList,
+    Modal, Button, StyleSheet,
+    Alert, PanResponder } from 'react-native';
 import { Card, Icon, Rating, Input } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
@@ -14,11 +16,6 @@ const mapStateToProps = state => {
     };
 };
 
-const mapDispatchToProps = {
-    postFavorite: campsiteId => (postFavorite(campsiteId)),
-    postComment: (campsiteId, rating, author, text) => (postComment(campsiteId, rating, author, text))
-};
-
 function RenderCampsite(props) {
 
     const {campsite} = props;
@@ -27,18 +24,20 @@ function RenderCampsite(props) {
 
     const recognizeDrag = ({dx}) => (dx < -200) ? true : false;
 
+    const recognizeComment = ({dx}) => (dx > 200) ? true : false;
+
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onPanResponderGrant: () => {
             view.current.rubberBand(1000)
             .then(endState => console.log(endState.finished ? 'finished' : 'canceled'));
-        },  
+        },
         onPanResponderEnd: (e, gestureState) => {
             console.log('pan responder end', gestureState);
-            if(recognizeDrag(gestureState)) {
+            if (recognizeDrag(gestureState)) {
                 Alert.alert(
                     'Add Favorite',
-                    'Are you sure you wish to add' + campsite.name + 'to favorite?',
+                    'Are you sure you wish to add ' + campsite.name + ' to favorites?',
                     [
                         {
                             text: 'Cancel',
@@ -47,13 +46,15 @@ function RenderCampsite(props) {
                         },
                         {
                             text: 'OK',
-                            onPress: () => props.favorite ? 
+                            onPress: () => props.favorite ?
                                 console.log('Already set as a favorite') : props.markFavorite()
                         }
                     ],
-                    {cancelable:false}
+                    { cancelable: false }
                 );
-
+            }
+            if(recognizeComment(gestureState)){
+                props.onShowModal();
             }
             return true;
         }
@@ -62,11 +63,11 @@ function RenderCampsite(props) {
     if(campsite) {
         return (
             <Animatable.View 
-            animation='fadeInDown' 
-            duration={2000} 
-            delay={1000}
-            ref={view}
-            {...panResponder.panHandlers}
+                animation='fadeInDown' 
+                duration={2000} 
+                delay={1000}
+                ref={view}
+                {...panResponder.panHandlers}
             >
                 <Card
                     featuredTitle={campsite.name}
@@ -82,7 +83,8 @@ function RenderCampsite(props) {
                             color='#f50'
                             raised
                             reverse
-                            onPress={() => props.favorite ? console.log('Already Marked') : props.markFavorite()}
+                            onPress={() => props.favorite ? 
+                                console.log('Already Marked') : props.markFavorite()}
                         />
                         <Icon
                             name={'pencil'}
@@ -101,6 +103,11 @@ function RenderCampsite(props) {
     return <View />
 };
 
+const mapDispatchToProps = {
+    postFavorite: campsiteId => (postFavorite(campsiteId)),
+    postComment: (campsiteId, rating, author, text) => (postComment(campsiteId, rating, author, text))
+};
+
 function RenderComments({ comments }) {
 
     const renderCommentItem = ({item}) => {
@@ -111,7 +118,7 @@ function RenderComments({ comments }) {
                     readonly
                     imageSize={10}
                     style={{alignItems:'flex-start', paddingVertical:'5%'}}
-                    startingValue={item.rating}
+                    startingValue={parseInt(item.rating)}
                 >
                 Stars
                 </Rating>
@@ -140,6 +147,7 @@ class CampsiteInfo extends Component {
 
     constructor(props){
         super(props);
+
         this.state = {
             showModal: false,
             rating: 5,
